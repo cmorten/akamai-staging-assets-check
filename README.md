@@ -1,15 +1,24 @@
 # akamai-staging-assets-check
 
-This project is for check the status of assets in Akamai Staging.
+This project is for check the status of assets in Akamai staging.
 
 ## Usage
 
-The script will currently only work for MacOS Mojave. In it's current state it is geared towards personal use opposed to use in CI pipelines.
-
-To check assets, first update the `ASSET_PATHS` array with the list of asset paths you wish to test and the `BASE_DOMAIN` for the domain the assets are hosted on.
-
-Once configuration is set, run the script by
+The script has only been tested on MacOS Mojave and not guaranteed to work elsewhere
 
 ```console
-./akamai-staging-assets-check.sh
+akamai-staging-assets-check - check the status of assets in Akamai staging
+
+Usage:
+
+akamai-staging-assets-check [flags]
+
+Flags:
+-h                        show brief help
+-a          [REQUIRED]    specify an asset path to check (can use multiple times)
+-b          [REQUIRED]    specify the base domain for assets
+
+Example:
+
+    akamai-staging-assets-check -a /asset/path/one.js -a /asset/path/two.js -b my.assets.com
 ```
