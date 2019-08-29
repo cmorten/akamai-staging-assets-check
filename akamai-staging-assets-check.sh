@@ -5,7 +5,7 @@ function usage() {
   echo " "
   echo "Usage:"
   echo " "
-  echo "akamai-staging-assets-check [flags]"
+  echo "./akamai-staging-assets-check.sh [flags]"
   echo " "
   echo "Flags:"
   echo "-h                        show brief help"
@@ -14,7 +14,7 @@ function usage() {
   echo " "
   echo "Example:"
   echo " "
-  echo "    akamai-staging-assets-check -a /asset/path/one.js -a /asset/path/two.js -b my.assets.com"
+  echo '    ./akamai-staging-assets-check.sh -a "/asset/path/one.js" -a "/asset/path/two.js" -b "my.assets.com"'
 }
 
 ASSET_PATHS=()
@@ -29,21 +29,20 @@ while getopts "a:b:h" opt; do
 done
 shift $((OPTIND - 1))
 
-if [ -z ${ASSET_PATHS} ]; then
-  echo -e "Error: At least one asset path must be provided.\n"
-  usage
-  exit 1
-fi
-
 if [ -z ${BASE_DOMAIN} ]; then
   echo -e "Error: A base domain must be provided.\n"
   usage
   exit 1
 fi
 
+if [ -z ${ASSET_PATHS} ]; then
+  echo -e "Error: At least one asset path must be provided.\n"
+  usage
+  exit 1
+fi
+
 akamaiDomain=$(nslookup ${BASE_DOMAIN} | grep "Name:.*akamaiedge.net" | cut -f2- -d: | xargs)
 akamaiStagingDomain=${akamaiDomain//akamaiedge/akamaiedge-staging}
-akamaiStagingIP=$(nslookup ${akamaiStagingDomain} | grep "Address:.*" | tail -1 | cut -f2- -d: | xargs)
 
 echo -e "BASE DOMAIN:\t\t\t${BASE_DOMAIN}"
 echo -e "AKAMAI CNAME:\t\t\t${akamaiDomain}"
@@ -51,7 +50,7 @@ echo -e "AKAMAI STAGING CNAME:\t\t${akamaiStagingDomain}\n"
 echo -e "Asset Status Checks:"
 
 connectToString="${BASE_DOMAIN}:443:${akamaiStagingDomain}:443"
-exitStatus=0
+exitCode=0
 
 for assetPath in "${ASSET_PATHS[@]}"; do
   assetUrl="https://${BASE_DOMAIN}${assetPath}"
@@ -59,8 +58,8 @@ for assetPath in "${ASSET_PATHS[@]}"; do
   echo -e "\t${stagingAssetStatusCode}\t${assetUrl}"
 
   if [ ${stagingAssetStatusCode} -ne 200 ]; then
-    exitStatus=1
+    exitCode=1
   fi
 done
 
-exit ${exitStatus}
+exit ${exitCode}
